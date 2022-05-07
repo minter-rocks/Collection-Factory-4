@@ -52,6 +52,11 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
     }
 
     /**
+     * @notice maximum number of tokens can be minted.
+     */
+    uint256 public totalSupply;
+
+    /**
      * @notice initialize the gallery called by the Factory.
      * @dev can be called only one time.
      * @param _creator creator of the gallery.
@@ -65,6 +70,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
         string memory _creator,
         string memory _name, 
         string memory _symbol,
+        uint256 _totalSupply,
         address _owner,
         uint96 _royaltyNumerator,
         address _royaltyReciever
@@ -74,6 +80,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
         __ERC721URIStorage_init();
         __ERC721Burnable_init();
         __Ownable_init(_owner);
+        totalSupply = _totalSupply;
         if (_royaltyNumerator > 0) {
             require(_royaltyReciever != address(0), "Gallery: Invalid Royalty receiver");
             _setDefaultRoyalty(_royaltyReciever, _royaltyNumerator);
