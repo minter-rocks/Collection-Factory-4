@@ -159,6 +159,12 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
         _resetTokenRoyalty(tokenId);
     }
 
+    function _mint(address to, uint256 tokenId) internal override {
+        require (tokenId < totalSupply, "Gallery: Invalid token Id");
+        super._mint(to, tokenId);
+    }
+
+
     // The following functions are overrides required by Solidity.
 
     function _burn(uint256 tokenId)
