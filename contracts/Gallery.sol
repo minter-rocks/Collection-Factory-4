@@ -61,6 +61,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
      * @param _creator creator of the gallery.
      * @param _name name of gallery tokens.
      * @param _symbol symbol of gallery tokens.
+     * @param _totalSupply maximum number of tokens can be minted.
      * @param _owner address of the creator of the gallery.
      * @param _royaltyNumerator the numerator of default token royalties which denumerator is 10000.
      * @param _royaltyReciever the wallet address that receives the royalty.
