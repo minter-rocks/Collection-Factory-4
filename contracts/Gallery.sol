@@ -159,6 +159,10 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
         _resetTokenRoyalty(tokenId);
     }
 
+    /**
+     * @notice override mint function to change functionality.
+     * @notice tokenIds limited to totalSupply.
+     */
     function _mint(address to, uint256 tokenId) internal override {
         require (tokenId < totalSupply, "Gallery: Invalid token Id");
         super._mint(to, tokenId);
