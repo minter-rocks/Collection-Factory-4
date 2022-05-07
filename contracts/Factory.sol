@@ -36,6 +36,7 @@ contract Factory {
         string creatorName,
         string tokenName,
         string tokenSymbol,
+        uint256 totalSupply,
         address creatorAddress,
         address contractAddress,
         uint96 defaultRoyalty
@@ -58,6 +59,7 @@ contract Factory {
         string memory creatorName,
         string memory tokenName,
         string memory tokenSymbol,
+        uint256 totalSupply,
         uint96 royaltyNumerator,
         address royaltyReciever
     ) public {
@@ -66,6 +68,7 @@ contract Factory {
             creatorName,
             tokenName, 
             tokenSymbol,
+            totalSupply,
             msg.sender,
             royaltyNumerator,
             royaltyReciever
@@ -74,6 +77,7 @@ contract Factory {
             creatorName, 
             tokenName, 
             tokenSymbol, 
+            totalSupply,
             msg.sender,
             galleryAddr, 
             royaltyNumerator
