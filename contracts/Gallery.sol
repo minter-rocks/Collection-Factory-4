@@ -22,7 +22,6 @@ pragma solidity ^0.8.4;
  */
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721RoyaltyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -32,7 +31,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 /**
  * @title NFT Gallery contract
  */
-contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
+contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
@@ -77,7 +76,6 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
     ) initializer public {
         _creator_ = _creator;
         __ERC721_init(_name, _symbol);
-        __ERC721URIStorage_init();
         __ERC721Burnable_init();
         __Ownable_init(_owner);
         totalSupply = _totalSupply;
@@ -91,30 +89,23 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
      * @notice mint a new token.
      * @param to address that will own the token.
      * @param tokenId desired id selected for the token.
-     * @param uri uri of the token.
      * @dev the tokenId should be not minted before.
      * @notice only owner of the contract can call this function.
      */
     function safeMint(
         address to, 
-        uint256 tokenId, 
-        string memory uri
+        uint256 tokenId
     ) public onlyOwner {
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
     }
 
     /**
      * @notice mint a new token.
      * @param to address that will own the token.
-     * @param uri uri of the token.
      * @dev the tokenId will be earned automatically.
      * @notice only owner of the contract can call this function.
      */
-    function safeMint(
-        address to, 
-        string memory uri
-    ) public onlyOwner {
+    function safeMint(address to) public onlyOwner {
         uint256 tokenId;
         do {
             tokenId = _tokenIdCounter.current();
@@ -122,7 +113,6 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
         } while (_exists(tokenId));
 
         _safeMint(to, tokenId);
-        _setTokenURI(tokenId, uri);
     }
 
     /**
@@ -173,18 +163,9 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721URIStorageUpgradeabl
 
     function _burn(uint256 tokenId)
         internal
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable, ERC721RoyaltyUpgradeable)
+        override(ERC721Upgradeable, ERC721RoyaltyUpgradeable)
     {
         super._burn(tokenId);
-    }
-
-    function tokenURI(uint256 tokenId)
-        public
-        view
-        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
-        returns (string memory)
-    {
-        return super.tokenURI(tokenId);
     }
 
     function supportsInterface(bytes4 interfaceId)
