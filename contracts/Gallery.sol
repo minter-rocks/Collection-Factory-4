@@ -42,6 +42,15 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
     string public _creator_;
 
     /**
+     * @notice change the creator name.
+     * @param _creatorName new name of the creator.
+     * @notice only owner of the contract can call this function.
+     */
+    function setCreatorName(string memory _creatorName) public onlyOwner {
+        _creator_ = _creatorName;
+    }
+
+    /**
      * @notice the base uri of the collection on IPFS.
      */
     string private _baseURI_;
@@ -51,15 +60,6 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
      */
     function _baseURI() internal view override returns (string memory) {
         return _baseURI_;
-    }
-
-    /**
-     * @notice change the creator name.
-     * @param _creatorName new name of the creator.
-     * @notice only owner of the contract can call this function.
-     */
-    function setCreatorName(string memory _creatorName) public onlyOwner {
-        _creator_ = _creatorName;
     }
 
     /**
