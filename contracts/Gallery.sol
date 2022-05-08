@@ -42,6 +42,18 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
     string public _creator_;
 
     /**
+     * @notice the base uri of the collection on IPFS.
+     */
+    string private _baseURI_;
+
+    /**
+     * @notice override -baseURI function to define functionality.
+     */
+    function _baseURI() internal view override returns (string memory) {
+        return _baseURI_;
+    }
+
+    /**
      * @notice change the creator name.
      * @param _creatorName new name of the creator.
      * @notice only owner of the contract can call this function.
@@ -61,6 +73,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
      * @param _creator creator of the gallery.
      * @param _name name of gallery tokens.
      * @param _symbol symbol of gallery tokens.
+     * @param _uri the base uri of the collection on IPFS.
      * @param _totalSupply maximum number of tokens can be minted.
      * @param _owner address of the creator of the gallery.
      * @param _royaltyNumerator the numerator of default token royalties which denumerator is 10000.
@@ -70,6 +83,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
         string memory _creator,
         string memory _name, 
         string memory _symbol,
+        string memory _uri,
         uint256 _totalSupply,
         address _owner,
         uint96 _royaltyNumerator,
@@ -79,6 +93,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
         __ERC721_init(_name, _symbol);
         __ERC721Burnable_init();
         __Ownable_init(_owner);
+        _baseURI_ = _uri;
         totalSupply = _totalSupply;
         if (_royaltyNumerator > 0) {
             require(_royaltyReciever != address(0), "Gallery: Invalid Royalty receiver");
