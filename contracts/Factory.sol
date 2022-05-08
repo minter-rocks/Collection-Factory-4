@@ -47,6 +47,8 @@ contract Factory {
      * @param creatorName enter your name as the creator of the new gallery.
      * @param tokenName name of gallery tokens.
      * @param tokenSymbol symbol of gallery tokens.
+     * @param baseURI the base uri of the collection on IPFS.
+     * @param totalSupply maximum number of tokens can be minted.
      * @param royaltyNumerator the numerator of default token royalties which denumerator.
      * is 10000. if you set a royaltyNumerator, you will earn a fraction of the tokens.
      * price, every time they tranfers in market places.
@@ -59,6 +61,7 @@ contract Factory {
         string memory creatorName,
         string memory tokenName,
         string memory tokenSymbol,
+        string memory baseURI,
         uint256 totalSupply,
         uint96 royaltyNumerator,
         address royaltyReciever
@@ -68,6 +71,7 @@ contract Factory {
             creatorName,
             tokenName, 
             tokenSymbol,
+            baseURI,
             totalSupply,
             msg.sender,
             royaltyNumerator,
