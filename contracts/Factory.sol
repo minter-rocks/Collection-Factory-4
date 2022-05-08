@@ -52,7 +52,7 @@ contract Factory {
      * price, every time they tranfers in market places.
      * @param royaltyReciever the wallet address that receives the royalty.
      * @dev clones a predeployed gallery contract abi with a new address onchain.
-     * @dev and initializes the new created gallery as the creator desired.
+     * @dev initializes the new created gallery as the creator desired.
      * @dev emits a NewGallery event.
      */
     function newGallery(
