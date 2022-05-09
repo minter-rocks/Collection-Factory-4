@@ -181,6 +181,15 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeabl
         super._mint(to, tokenId);
     }
 
+    event Comment(uint256 indexed tokenId, string text);
+    /**
+     * @notice comments as event.
+     */
+    function comment(uint256 tokenId, string memory text) public {
+        require(msg.sender == ownerOf(tokenId), "Gallery: Invalid token Id");
+        emit Comment(tokenId, text);
+    }
+
 
     // The following functions are overrides required by Solidity.
 
