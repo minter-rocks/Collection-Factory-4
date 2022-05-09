@@ -22,6 +22,7 @@ pragma solidity ^0.8.4;
  */
 
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721RoyaltyUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -31,7 +32,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 /**
  * @title NFT Gallery contract
  */
-contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
+contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
@@ -65,7 +66,12 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
     /**
      * @notice maximum number of tokens can be minted.
      */
-    uint256 public totalSupply;
+    uint256 public maxSupply;
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
 
     /**
      * @notice initialize the gallery called by the Factory.
@@ -74,7 +80,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
      * @param _name name of gallery tokens.
      * @param _symbol symbol of gallery tokens.
      * @param _uri the base uri of the collection on IPFS.
-     * @param _totalSupply maximum number of tokens can be minted.
+     * @param _maxSupply maximum number of tokens can be minted.
      * @param _owner address of the creator of the gallery.
      * @param _royaltyNumerator the numerator of default token royalties which denumerator is 10000.
      * @param _royaltyReciever the wallet address that receives the royalty.
@@ -84,17 +90,18 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
         string memory _name, 
         string memory _symbol,
         string memory _uri,
-        uint256 _totalSupply,
+        uint256 _maxSupply,
         address _owner,
         uint96 _royaltyNumerator,
         address _royaltyReciever
     ) initializer public {
         _creator_ = _creator;
         __ERC721_init(_name, _symbol);
+        __ERC721Enumerable_init();
         __ERC721Burnable_init();
         __Ownable_init(_owner);
         _baseURI_ = _uri;
-        totalSupply = _totalSupply;
+        maxSupply = _maxSupply;
         if (_royaltyNumerator > 0) {
             require(_royaltyReciever != address(0), "Gallery: Invalid Royalty receiver");
             _setDefaultRoyalty(_royaltyReciever, _royaltyNumerator);
@@ -167,15 +174,22 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
 
     /**
      * @notice override mint function to change functionality.
-     * @notice tokenIds limited to totalSupply.
+     * @notice tokenIds limited to maxSupply.
      */
     function _mint(address to, uint256 tokenId) internal override {
-        require (tokenId < totalSupply, "Gallery: Invalid token Id");
+        require (tokenId < maxSupply, "Gallery: Invalid token Id");
         super._mint(to, tokenId);
     }
 
 
     // The following functions are overrides required by Solidity.
+
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
+        internal
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable)
+    {
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
 
     function _burn(uint256 tokenId)
         internal
@@ -187,7 +201,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721BurnableUpgradeable,
     function supportsInterface(bytes4 interfaceId)
         public
         view
-        override(ERC721Upgradeable, ERC721RoyaltyUpgradeable)
+        override(ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721RoyaltyUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
