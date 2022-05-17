@@ -19,20 +19,20 @@ import "@openzeppelin/contracts/proxy/Clones.sol";
 import "./Collection2.sol";
 
 /**
- * @title NFT Gallery Factory
+ * @title NFT Collection Factory
  * @author Minter.Rocks
- * @notice create your own NFT gallery contract and convert your files to NFTs
+ * @notice create your own NFT collection contract and convert your files to NFTs
  * in the simplest way possible.
  */
 contract Factory {
     using Clones for address;
 
     /**
-     * @notice the predeployed gallery contract abi which the Factory clones.
+     * @notice the predeployed collection contract abi which the Factory clones.
      */
-    Gallery public galleryCont = new Gallery();
+    Collection public collectionCont = new Collection();
 
-    event NewGallery(
+    event NewCollection(
         string creatorName,
         string tokenName,
         string tokenSymbol,
@@ -43,21 +43,21 @@ contract Factory {
     );
 
     /**
-     * @notice Create a new NFT gallery.
-     * @param creatorName enter your name as the creator of the new gallery.
-     * @param tokenName name of gallery tokens.
-     * @param tokenSymbol symbol of gallery tokens.
+     * @notice Create a new NFT collection.
+     * @param creatorName enter your name as the creator of the new collection.
+     * @param tokenName name of collection tokens.
+     * @param tokenSymbol symbol of collection tokens.
      * @param baseURI the base uri of the collection on IPFS.
      * @param totalSupply maximum number of tokens can be minted.
      * @param royaltyNumerator the numerator of default token royalties which denumerator.
      * is 10000. if you set a royaltyNumerator, you will earn a fraction of the tokens.
      * price, every time they tranfers in market places.
      * @param royaltyReciever the wallet address that receives the royalty.
-     * @dev clones a predeployed gallery contract abi with a new address onchain.
-     * @dev initializes the new created gallery as the creator desired.
-     * @dev emits a NewGallery event.
+     * @dev clones a predeployed collection contract abi with a new address onchain.
+     * @dev initializes the new created collection as the creator desired.
+     * @dev emits a NewCollection event.
      */
-    function newGallery(
+    function newCollection(
         string memory creatorName,
         string memory tokenName,
         string memory tokenSymbol,
@@ -66,8 +66,8 @@ contract Factory {
         uint96 royaltyNumerator,
         address royaltyReciever
     ) public {
-        address galleryAddr = address(galleryCont).clone();
-        Gallery(galleryAddr).initialize(
+        address collectionAddr = address(collectionCont).clone();
+        Collection(collectionAddr).initialize(
             creatorName,
             tokenName, 
             tokenSymbol,
@@ -77,13 +77,13 @@ contract Factory {
             royaltyNumerator,
             royaltyReciever
         );
-        emit NewGallery(
+        emit NewCollection(
             creatorName, 
             tokenName, 
             tokenSymbol, 
             totalSupply,
             msg.sender,
-            galleryAddr, 
+            collectionAddr, 
             royaltyNumerator
         );
     }

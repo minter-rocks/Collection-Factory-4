@@ -30,15 +30,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 /**
- * @title NFT Gallery contract
+ * @title NFT Collection contract
  */
-contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
+contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
 
     /**
-     * @notice creator of the gallery.
+     * @notice creator of the Collection.
      */
     string public _creator_;
 
@@ -74,14 +74,14 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeabl
     }
 
     /**
-     * @notice initialize the gallery called by the Factory.
+     * @notice initialize the Collection called by the Factory.
      * @dev can be called only one time.
-     * @param _creator creator of the gallery.
-     * @param _name name of gallery tokens.
-     * @param _symbol symbol of gallery tokens.
+     * @param _creator creator of the Collection.
+     * @param _name name of Collection tokens.
+     * @param _symbol symbol of Collection tokens.
      * @param _uri the base uri of the collection on IPFS.
      * @param _maxSupply maximum number of tokens can be minted.
-     * @param _owner address of the creator of the gallery.
+     * @param _owner address of the creator of the Collection.
      * @param _royaltyNumerator the numerator of default token royalties which denumerator is 10000.
      * @param _royaltyReciever the wallet address that receives the royalty.
      */
@@ -103,7 +103,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeabl
         _baseURI_ = _uri;
         maxSupply = _maxSupply;
         if (_royaltyNumerator > 0) {
-            require(_royaltyReciever != address(0), "Gallery: Invalid Royalty receiver");
+            require(_royaltyReciever != address(0), "Collection: Invalid Royalty receiver");
             _setDefaultRoyalty(_royaltyReciever, _royaltyNumerator);
         }
     }
@@ -150,12 +150,12 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeabl
         address receiver,
         uint96 feeNumerator
     ) public onlyOwner {
-        require(msg.sender == ownerOf(tokenId), "Gallery: you must be the owner of the token to set the royalty");
+        require(msg.sender == ownerOf(tokenId), "Collection: you must be the owner of the token to set the royalty");
         _setDefaultRoyalty(receiver, feeNumerator);
     }
 
     /**
-     * @notice Delete default royalty of gallery tokens.
+     * @notice Delete default royalty of Collection tokens.
      * @notice It can't be set again after that was removed.
      * @notice only owner of the contract can call this function.
      */
@@ -177,7 +177,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeabl
      * @notice tokenIds limited to maxSupply.
      */
     function _mint(address to, uint256 tokenId) internal override {
-        require (tokenId < maxSupply, "Gallery: Invalid token Id");
+        require (tokenId < maxSupply, "Collection: Invalid token Id");
         super._mint(to, tokenId);
     }
 
@@ -186,7 +186,7 @@ contract Gallery is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeabl
      * @notice comments as event.
      */
     function comment(uint256 tokenId, string memory text) public {
-        require(msg.sender == ownerOf(tokenId), "Gallery: Invalid token Id");
+        require(msg.sender == ownerOf(tokenId), "Collection: Invalid token Id");
         emit Comment(tokenId, text);
     }
 
