@@ -181,13 +181,13 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
         super._mint(to, tokenId);
     }
 
-    event Comment(uint256 indexed tokenId, string text);
+    event Comment(uint256 indexed tokenId, address userAddr, string text);
     /**
      * @notice comments as event.
      */
     function comment(uint256 tokenId, string memory text) public {
         require(msg.sender == ownerOf(tokenId), "Collection: Invalid token Id");
-        emit Comment(tokenId, text);
+        emit Comment(tokenId, msg.sender, text);
     }
 
 
