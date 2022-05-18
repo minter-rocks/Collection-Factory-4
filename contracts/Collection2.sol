@@ -30,7 +30,17 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 /**
- * @title NFT Collection contract
+ * @title NFT Collection contract version_2
+ * @notice tokenIds are starting from 0 to (maxSupply - 1).
+ * @notice tokenURIs are all in the same format baseURI/tokenId.
+ * @notice totalSupply is limited and set once at initializing time.
+ * @notice safeMint restricted to the owner.
+ * @notice safeMint can be auto increment or you can specify the tokenId.
+ * @notice there is a default royalty which can be set once at initializing time and 
+ * also every token can have its particular royalty and does not use default royalty.
+ * @notice owner of the contract can delete default royalty and token royalties and only 
+ * set royalty for a specific token if they own it.
+ * @notice every token owner can log a comment in the contract by its token and address.
  */
 contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
