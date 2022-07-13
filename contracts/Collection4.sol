@@ -30,7 +30,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 
 /**
- * @title NFT Collection contract version_2
+ * @title NFT Collection contract version_4
  * @notice the contract is ERC721 enumerable.
  * @notice tokenIds are starting from 0 to (maxSupply - 1).
  * @notice tokenURIs are all in the same format baseURI/tokenId.
