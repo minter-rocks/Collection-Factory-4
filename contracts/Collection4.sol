@@ -34,6 +34,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
  * @notice the contract is ERC721 enumerable.
  * @notice tokenIds are starting from 0 to (maxSupply - 1).
  * @notice tokenURIs are all in the same format baseURI/tokenId.
+ * @notice baseURI can be set by the owner of the collection.
  * @notice totalSupply is limited and set once at initializing time.
  * @notice safeMint restricted to the owner.
  * @notice safeMint can be auto increment or you can specify the tokenId.
@@ -63,9 +64,20 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
     }
 
     /**
-     * @notice the base uri of the collection on IPFS.
+     * @notice the base URI of the collection on IPFS or desired data base.
      */
     string private _baseURI_;
+
+    event SetBaseURI(string baseURI_);
+    /**
+     * @notice change the baseURI.
+     * @param baseURI_ base URI of the tokens.
+     * @notice only owner of the contract can call this function.
+     */
+    function setBaseURI(string memory baseURI_) public onlyOwner {
+        _baseURI_ = baseURI_;
+        emit SetBaseURI(baseURI_);
+    }
 
     /**
      * @notice override -baseURI function to define functionality.
