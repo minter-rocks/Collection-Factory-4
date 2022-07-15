@@ -27,7 +27,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Royalt
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
  * @title NFT Collection contract version_4
@@ -36,21 +35,20 @@ import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
  * @notice tokenURIs can be all similar (baseURI); or all in the same format (baseURI/tokenId).
  * @notice baseURI can be set by the owner of the collection.
  * @notice totalSupply is limited and set once at initializing time.
- * @notice safeMint restricted to the owner.
- * @notice safeMint can be auto increment or you can specify the tokenId.
+ * @notice the owner can safeMint single or batch tokens to any address desired.
+ * @notice also the owner can add one or more addresses to the white list so they can mint a token.
+ * @notice the owner can enable or disable the white list as they want.
  * @notice there is a default royalty which can be set once at initializing time and 
  * also every token can have its particular royalty and does not use default royalty.
  * @notice owner of the contract can delete default royalty and token royalties and only 
  * set royalty for a specific token if they own it.
- * @notice every token owner can log a comment in the contract by its token and address.
  */
 contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
-    using EnumerableSet for EnumerableSet.AddressSet;
     using StringsUpgradeable for uint256;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
-    EnumerableSet.AddressSet private _whiteList;
+    mapping(address => bool) _whiteList;
 
     /**
      * @notice creator of the Collection.
@@ -69,8 +67,8 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
     /**
      * @notice the base URI of the collection on IPFS or desired data base.
      */
-    string private baseURI;
-    bool private sameURI;
+    string public baseURI;
+    bool public sameURI;
 
     event SetBaseURI(string baseURI_, bool sameForAllTokens);
     /**
@@ -141,15 +139,25 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
         }
     }
 
+    bool whiteListIsEnabled;
+
+    function enableWhiteList() public onlyOwner {
+        whiteListIsEnabled = true;
+    }
+
+    function disableWhiteList() public onlyOwner {
+        whiteListIsEnabled = false;
+    }
+
     function addToWhiteList(address[] memory addrList) public onlyOwner {
         for(uint256 index; index < addrList.length; index++) {
-            _whiteList.add(addrList[index]);
+            _whiteList[addrList[index]] = true;
         }
     }
 
     function removeFromWhiteList(address[] memory addrList) public onlyOwner {
         for(uint256 index; index < addrList.length; index++) {
-            _whiteList.add(addrList[index]);
+            _whiteList[addrList[index]] = false;
         }
     }
 
@@ -181,13 +189,14 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
      */
     function safeMint() public {
         address userAddr = msg.sender;
-        require(_whiteList.contains(userAddr));
+        require(whiteListIsEnabled, "Collection: whiteList is not enabled");
+        require(_whiteList[userAddr], "Collection: address not registered in white list");
 
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(userAddr, tokenId);
 
-        _whiteList.remove(userAddr);
+        _whiteList[userAddr] = false;
     }
 
     /**
