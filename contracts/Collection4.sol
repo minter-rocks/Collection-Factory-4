@@ -20,7 +20,6 @@ pragma solidity ^0.8.4;
  *   ██║ ╚═╝ ██║██║██║ ╚████║   ██║   ███████╗██║  ██║██╗██║  ██║╚██████╔╝╚██████╗██║  ██╗███████║
  *   ╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═╝ ╚═════╝  ╚═════╝╚═╝  ╚═╝╚══════╝
  */
-
 import "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721BurnableUpgradeable.sol";
@@ -33,7 +32,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
  * @title NFT Collection contract version_4
  * @notice the contract is ERC721 enumerable.
  * @notice tokenIds are starting from 0 to (maxSupply - 1).
- * @notice tokenURIs are all in the same format baseURI/tokenId.
+ * @notice tokenURIs can be all similar (baseURI); or all in the same format (baseURI/tokenId).
  * @notice baseURI can be set by the owner of the collection.
  * @notice totalSupply is limited and set once at initializing time.
  * @notice safeMint restricted to the owner.
@@ -46,6 +45,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
  */
 contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using StringsUpgradeable for uint256;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
 
@@ -66,24 +66,28 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
     /**
      * @notice the base URI of the collection on IPFS or desired data base.
      */
-    string private _baseURI_;
+    string private baseURI;
+    bool private sameURI;
 
-    event SetBaseURI(string baseURI_);
+    event SetBaseURI(string baseURI_, bool sameForAllTokens);
     /**
      * @notice change the baseURI.
      * @param baseURI_ base URI of the tokens.
      * @notice only owner of the contract can call this function.
      */
-    function setBaseURI(string memory baseURI_) public onlyOwner {
-        _baseURI_ = baseURI_;
-        emit SetBaseURI(baseURI_);
+    function setBaseURI(string memory baseURI_, bool sameForAllTokens) public onlyOwner {
+        baseURI = baseURI_;
+        sameURI = sameForAllTokens;
+        emit SetBaseURI(baseURI_, sameForAllTokens);
     }
 
     /**
-     * @notice override -baseURI function to define functionality.
+     * @dev See {IERC721Metadata-tokenURI}.
      */
-    function _baseURI() internal view override returns (string memory) {
-        return _baseURI_;
+    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+
+        return sameURI ? baseURI : string.concat(baseURI, tokenId.toString());
     }
 
     /**
@@ -102,7 +106,8 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
      * @param _creator creator of the Collection.
      * @param _name name of Collection tokens.
      * @param _symbol symbol of Collection tokens.
-     * @param _uri the base uri of the collection on IPFS.
+     * @param _baseURI the base uri of the collection on IPFS.
+     * @param _sameURIForAllTokens true if all tokens use a same URI.
      * @param _maxSupply maximum number of tokens can be minted.
      * @param _owner address of the creator of the Collection.
      * @param _royaltyNumerator the numerator of default token royalties which denumerator is 10000.
@@ -112,7 +117,8 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
         string memory _creator,
         string memory _name, 
         string memory _symbol,
-        string memory _uri,
+        string memory _baseURI,
+        bool _sameURIForAllTokens,
         uint256 _maxSupply,
         address _owner,
         uint96 _royaltyNumerator,
@@ -123,7 +129,8 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
         __ERC721Enumerable_init();
         __ERC721Burnable_init();
         __Ownable_init(_owner);
-        _baseURI_ = _uri;
+        baseURI = _baseURI;
+        sameURI = _sameURIForAllTokens;
         maxSupply = _maxSupply;
         if (_royaltyNumerator > 0) {
             require(_royaltyReciever != address(0), "Collection: Invalid Royalty receiver");
