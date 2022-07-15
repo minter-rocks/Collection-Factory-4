@@ -62,6 +62,7 @@ contract Factory {
         string memory tokenName,
         string memory tokenSymbol,
         string memory baseURI,
+        bool _sameURIForAllTokens,
         uint256 totalSupply,
         uint96 royaltyNumerator,
         address royaltyReciever
@@ -72,6 +73,7 @@ contract Factory {
             tokenName, 
             tokenSymbol,
             baseURI,
+            _sameURIForAllTokens,
             totalSupply,
             msg.sender,
             royaltyNumerator,
