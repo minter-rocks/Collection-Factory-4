@@ -27,6 +27,7 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Royalt
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
 /**
  * @title NFT Collection contract version_4
@@ -45,9 +46,11 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
  */
 contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgradeable, ERC721BurnableUpgradeable, ERC721RoyaltyUpgradeable, OwnableUpgradeable {
     using CountersUpgradeable for CountersUpgradeable.Counter;
+    using EnumerableSet for EnumerableSet.AddressSet;
     using StringsUpgradeable for uint256;
 
     CountersUpgradeable.Counter private _tokenIdCounter;
+    EnumerableSet.AddressSet private _whiteList;
 
     /**
      * @notice creator of the Collection.
@@ -138,34 +141,53 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
         }
     }
 
-    /**
-     * @notice mint a new token.
-     * @param to address that will own the token.
-     * @param tokenId desired id selected for the token.
-     * @dev the tokenId should be not minted before.
-     * @notice only owner of the contract can call this function.
-     */
-    function safeMint(
-        address to, 
-        uint256 tokenId
-    ) public onlyOwner {
-        _safeMint(to, tokenId);
+    function addToWhiteList(address[] memory addrList) public onlyOwner {
+        for(uint256 index; index < addrList.length; index++) {
+            _whiteList.add(addrList[index]);
+        }
+    }
+
+    function removeFromWhiteList(address[] memory addrList) public onlyOwner {
+        for(uint256 index; index < addrList.length; index++) {
+            _whiteList.add(addrList[index]);
+        }
+    }
+
+    function safeMintBatch(address[] memory to) public onlyOwner {
+        uint256 tokenId;
+        for(uint256 index; index < to.length; index++) {
+            tokenId = _tokenIdCounter.current();
+            _tokenIdCounter.increment();
+            _safeMint(to[index], tokenId);
+        }
     }
 
     /**
      * @notice mint a new token.
      * @param to address that will own the token.
-     * @dev the tokenId will be earned automatically.
+     * @dev the tokenId will be set automatically.
      * @notice only owner of the contract can call this function.
      */
     function safeMint(address to) public onlyOwner {
-        uint256 tokenId;
-        do {
-            tokenId = _tokenIdCounter.current();
-            _tokenIdCounter.increment();
-        } while (_exists(tokenId));
-
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
         _safeMint(to, tokenId);
+    }
+
+    /**
+     * @notice mint a new token.
+     * @dev the tokenId will be set automatically.
+     * @notice only whiteList can call this function.
+     */
+    function safeMint() public {
+        address userAddr = msg.sender;
+        require(_whiteList.contains(userAddr));
+
+        uint256 tokenId = _tokenIdCounter.current();
+        _tokenIdCounter.increment();
+        _safeMint(userAddr, tokenId);
+
+        _whiteList.remove(userAddr);
     }
 
     /**
@@ -210,16 +232,6 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
         require (tokenId < maxSupply, "Collection: Invalid token Id");
         super._mint(to, tokenId);
     }
-
-    event Comment(uint256 indexed tokenId, address userAddr, string text);
-    /**
-     * @notice comments as event.
-     */
-    function comment(uint256 tokenId, string memory text) public {
-        require(msg.sender == ownerOf(tokenId), "Collection: Invalid token Id");
-        emit Comment(tokenId, msg.sender, text);
-    }
-
 
     // The following functions are overrides required by Solidity.
 
