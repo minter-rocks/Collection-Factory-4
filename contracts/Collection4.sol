@@ -37,7 +37,7 @@ import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
  * @notice totalSupply is limited and set once at initializing time.
  * @notice the owner can safeMint single or batch tokens to any address desired.
  * @notice also the owner can add one or more addresses to the white list so they can mint a token.
- * @notice the owner can enable or disable the white list as they want.
+ * @notice the owner can enable or disable the white list as they want. if disable, every one can mint.
  * @notice there is a default royalty which can be set once at initializing time and 
  * also every token can have its particular royalty and does not use default royalty.
  * @notice owner of the contract can delete default royalty and token royalties and only 
@@ -185,18 +185,19 @@ contract Collection is Initializable, ERC721Upgradeable, ERC721EnumerableUpgrade
     /**
      * @notice mint a new token.
      * @dev the tokenId will be set automatically.
-     * @notice only whiteList can call this function.
+     * @notice if white list is enabled, only whiteList can call this function.
      */
     function safeMint() public {
         address userAddr = msg.sender;
-        require(whiteListIsEnabled, "Collection: whiteList is not enabled");
-        require(_whiteList[userAddr], "Collection: address not registered in white list");
+        if(whiteListIsEnabled) {
+            require(_whiteList[userAddr], "Collection: address not registered in white list");
+            _whiteList[userAddr] = false;
+        }
 
         uint256 tokenId = _tokenIdCounter.current();
         _tokenIdCounter.increment();
         _safeMint(userAddr, tokenId);
 
-        _whiteList[userAddr] = false;
     }
 
     /**
